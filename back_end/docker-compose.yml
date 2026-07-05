@@ -1,8 +1,7 @@
-version: "3.9"
-
 services:
   api:
     build: .
+    restart: unless-stopped
     ports:
       - "4000:4000"
     environment:
@@ -10,11 +9,14 @@ services:
       PORT: 4000
       DATABASE_URL: postgresql://postgres:password@db:5432/todo_dev
       DIRECT_URL: postgresql://postgres:password@db:5432/todo_dev
+      CORS_ORIGIN: http://localhost:5173
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   db:
     image: postgres:16-alpine
+    restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
@@ -23,6 +25,22 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d todo_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  migrate:
+    build: .
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://postgres:password@db:5432/todo_dev
+      DIRECT_URL: postgresql://postgres:password@db:5432/todo_dev
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["npx", "prisma", "migrate", "deploy"]
 
 volumes:
   postgres_data:

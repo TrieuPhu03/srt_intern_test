@@ -2,31 +2,32 @@
 
 Full-stack Todo application scaffold for the SRT intern assignment.
 
-The current codebase includes:
+The codebase includes:
 
-- React/Vite frontend app shell with routing, theme toggle, language switcher, and Todo management UI.
-- Express/TypeScript backend foundation with environment validation, health check, shared middleware, Prisma client setup, and Todo database schema.
-- Docker Compose setup for local PostgreSQL.
+- React/Vite frontend with routing, theme toggle, language switcher, and Todo management UI.
+- Express/TypeScript backend with environment validation, health check, shared middleware, Prisma client setup, and Todo API module.
+- PostgreSQL persistence through Prisma.
+- Docker Compose setup for running the backend API and PostgreSQL locally.
 
 ## Tech Stack
 
 - Frontend: React, Vite, TypeScript, Tailwind CSS, React Router, Axios, i18next
 - Backend: Node.js, Express, TypeScript, Prisma, PostgreSQL, Zod
-- Tooling: Docker Compose, Jest, Supertest
+- Tooling: Docker, Docker Compose, Jest, Supertest
 
 ## Project Structure
 
 ```text
 .
 +-- front_end/   # React + Vite client
-`-- back_end/    # Express + Prisma API foundation
+`-- back_end/    # Express + Prisma API
 ```
 
 ## Requirements
 
 - Node.js LTS
 - npm
-- Docker Desktop, recommended for local PostgreSQL
+- Docker Desktop
 
 ## Backend Setup
 
@@ -45,10 +46,16 @@ DIRECT_URL=postgresql://postgres:password@localhost:5432/todo_dev
 CORS_ORIGIN=http://localhost:5173
 ```
 
-Start PostgreSQL:
+Start PostgreSQL with Docker:
 
 ```bash
 docker compose up -d db
+```
+
+Apply Prisma migrations:
+
+```bash
+npm run prisma:migrate
 ```
 
 Generate Prisma client:
@@ -86,6 +93,56 @@ npm run dev
 
 The frontend runs at `http://localhost:5173`.
 
+## Docker Backend Option
+
+Use this mode when you want Docker to run both the backend API and PostgreSQL.
+Do not run `npm run dev` at the same time, because both modes use port `4000`.
+
+```bash
+cd back_end
+docker compose up -d db
+docker compose run --rm migrate
+docker compose up api
+```
+
+What these commands do:
+
+- `docker compose up -d db` starts the PostgreSQL container.
+- `docker compose run --rm migrate` applies Prisma migrations and creates the database tables.
+- `docker compose up api` starts the backend API container.
+
+The backend API will be available at:
+
+```text
+http://localhost:4000
+```
+
+Health check:
+
+```bash
+curl http://localhost:4000/health
+```
+
+List todos:
+
+```bash
+curl http://localhost:4000/api/todos
+```
+
+Stop containers:
+
+```bash
+docker compose down
+```
+
+Reset the local Docker database:
+
+```bash
+docker compose down -v
+```
+
+Use `docker compose down -v` only when you want to delete the local PostgreSQL data volume.
+
 ## Common Commands
 
 Backend:
@@ -109,33 +166,17 @@ npm run preview
 npm run typecheck
 ```
 
-## Docker Backend Option
+## API Endpoints
 
-To run the backend API and PostgreSQL together:
-
-```bash
-cd back_end
-docker compose up --build
-```
-
-## Current API Status
-
-Implemented:
-
-| Method | Endpoint  | Description  |
-| ------ | --------- | ------------ |
-| GET    | `/health` | Health check |
-
-The frontend Todo UI is wired to the following API contract, which should be implemented in the backend Todo module next:
-
-| Method | Endpoint                | Description        |
-| ------ | ----------------------- | ------------------ |
-| GET    | `/api/todos`            | List todos         |
-| GET    | `/api/todos/:id`        | Get todo by ID     |
-| POST   | `/api/todos`            | Create todo        |
-| PATCH  | `/api/todos/:id`        | Update todo        |
-| PATCH  | `/api/todos/:id/toggle` | Toggle todo status |
-| DELETE | `/api/todos/:id`        | Delete todo        |
+| Method | Endpoint                | Description                                 |
+| ------ | ----------------------- | ------------------------------------------- |
+| GET    | `/health`               | Health check                                |
+| GET    | `/api/todos`            | List todos with search, filter, pagination  |
+| GET    | `/api/todos/:id`        | Get todo by ID                              |
+| POST   | `/api/todos`            | Create todo                                 |
+| PATCH  | `/api/todos/:id`        | Update todo                                 |
+| PATCH  | `/api/todos/:id/toggle` | Toggle todo status                          |
+| DELETE | `/api/todos/:id`        | Delete todo                                 |
 
 ## Git Notes
 
