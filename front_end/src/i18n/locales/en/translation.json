@@ -7,11 +7,38 @@
   },
   "common": {
     "loading": "Loading application...",
-    "not_found": "404 - Page Not Found"
+    "not_found": "404 - Page Not Found",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page"
   },
-  "home": {
-    "eyebrow": "Application shell",
-    "title": "SRT Todo is ready for feature work",
-    "description": "The React app shell includes routing, theming, localization, and shared layout foundations."
+  "todos": {
+    "title": "Todo List",
+    "subtitle": "Create, organize, and finish daily work in one focused list.",
+    "add_button": "Add Todo",
+    "search_placeholder": "Search todos...",
+    "filter_all": "All",
+    "filter_pending": "Pending",
+    "filter_completed": "Completed",
+    "empty_state": "No todos found. Create your first one.",
+    "loading": "Loading todos...",
+    "error": "Failed to load todos. Please try again.",
+    "form_title_create": "New Todo",
+    "form_title_edit": "Edit Todo",
+    "field_title": "Title",
+    "field_description": "Description",
+    "title_placeholder": "Write project README",
+    "description_placeholder": "Optional details",
+    "submit_create": "Create",
+    "submit_update": "Save changes",
+    "delete_confirm_title": "Delete this todo?",
+    "delete_confirm_description": "This action cannot be undone.",
+    "delete_confirm_action": "Delete",
+    "cancel": "Cancel",
+    "pending": "Pending",
+    "completed": "Completed",
+    "stats_total": "Total",
+    "stats_done": "Completed",
+    "stats_open": "Open"
   }
 }
