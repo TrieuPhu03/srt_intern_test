@@ -1,22 +1,13 @@
-import { createBrowserRouter } from "react-router-dom";
-import { useTranslation } from "react-i18next";
+import React from "react";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 import MainLayout from "@/layouts/MainLayout";
 
 export const ROUTES = {
   ROOT: "/",
+  TODOS: "/todos",
 } as const;
 
-const HomePage = () => {
-  const { t } = useTranslation();
-
-  return (
-    <section className="mx-auto flex max-w-3xl flex-col gap-4 rounded-lg border bg-card p-6 shadow-sm">
-      <p className="text-sm font-medium text-primary">{t("home.eyebrow")}</p>
-      <h1 className="text-3xl font-semibold tracking-tight">{t("home.title")}</h1>
-      <p className="text-sm leading-6 text-muted-foreground">{t("home.description")}</p>
-    </section>
-  );
-};
+const TodosPage = React.lazy(() => import("./todos"));
 
 export const router = createBrowserRouter([
   {
@@ -24,7 +15,11 @@ export const router = createBrowserRouter([
     children: [
       {
         path: ROUTES.ROOT,
-        element: <HomePage />,
+        element: <Navigate to={ROUTES.TODOS} replace />,
+      },
+      {
+        path: ROUTES.TODOS,
+        element: <TodosPage />,
       },
     ],
   },
