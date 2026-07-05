@@ -1,0 +1,17 @@
+{
+  "app": {
+    "name": "SRT Todo",
+    "todo_workspace": "Khong gian cong viec",
+    "language": "Ngon ngu",
+    "theme": "Giao dien"
+  },
+  "common": {
+    "loading": "Dang tai ung dung...",
+    "not_found": "404 - Khong tim thay trang"
+  },
+  "home": {
+    "eyebrow": "Khung ung dung",
+    "title": "SRT Todo da san sang de phat trien tinh nang",
+    "description": "Khung React da co routing, giao dien, da ngon ngu va layout dung chung."
+  }
+}

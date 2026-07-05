@@ -1,0 +1,17 @@
+{
+  "app": {
+    "name": "SRT Todo",
+    "todo_workspace": "Todo workspace",
+    "language": "Language",
+    "theme": "Theme"
+  },
+  "common": {
+    "loading": "Loading application...",
+    "not_found": "404 - Page Not Found"
+  },
+  "home": {
+    "eyebrow": "Application shell",
+    "title": "SRT Todo is ready for feature work",
+    "description": "The React app shell includes routing, theming, localization, and shared layout foundations."
+  }
+}
