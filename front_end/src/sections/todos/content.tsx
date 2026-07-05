@@ -31,6 +31,7 @@ const TodosContent = () => {
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
+  const [mutationError, setMutationError] = useState<string | null>(null);
 
   const stats = useMemo(() => {
     const completed = todos.filter((todo) => todo.status === "COMPLETED").length;
@@ -44,27 +45,36 @@ const TodosContent = () => {
 
   const openCreateForm = () => {
     setEditingTodo(null);
+    setMutationError(null);
     setIsFormOpen(true);
   };
 
   const openEditForm = (todo: Todo) => {
     setEditingTodo(todo);
+    setMutationError(null);
     setIsFormOpen(true);
   };
 
   const closeForm = () => {
     setIsFormOpen(false);
     setEditingTodo(null);
+    setMutationError(null);
   };
 
   const handleSubmit = async (values: TodoFormValues) => {
-    if (editingTodo) {
-      await updateTodo(editingTodo.id, values);
-    } else {
-      await createTodo(values);
-    }
+    setMutationError(null);
 
-    closeForm();
+    try {
+      if (editingTodo) {
+        await updateTodo(editingTodo.id, values);
+      } else {
+        await createTodo(values);
+      }
+
+      closeForm();
+    } catch {
+      setMutationError(t("todos.save_error"));
+    }
   };
 
   const handleDelete = async (id: string) => {
@@ -73,7 +83,13 @@ const TodosContent = () => {
     );
 
     if (shouldDelete) {
-      await deleteTodo(id);
+      setMutationError(null);
+
+      try {
+        await deleteTodo(id);
+      } catch {
+        setMutationError(t("todos.delete_error"));
+      }
     }
   };
 
@@ -147,6 +163,11 @@ const TodosContent = () => {
               {editingTodo ? t("todos.form_title_edit") : t("todos.form_title_create")}
             </DialogTitle>
           </DialogHeader>
+          {mutationError ? (
+            <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+              {mutationError}
+            </div>
+          ) : null}
           <TodoForm initialValues={editingTodo} onSubmit={handleSubmit} onCancel={closeForm} />
         </DialogContent>
       </Dialog>

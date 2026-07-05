@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import type { PaginationMeta } from "@/types/api";
 import { todoService } from "../services/todo.service";
 import type {
@@ -70,17 +71,31 @@ export function useTodos() {
   }, [fetchTodos]);
 
   const createTodo = async (payload: CreateTodoPayload) => {
-    await todoService.create(payload);
-    await fetchTodos();
+    try {
+      await todoService.create(payload);
+      toast.success(t("todos.toast_create_success"));
+      await fetchTodos();
+    } catch (error) {
+      toast.error(t("todos.toast_create_error"));
+      throw error;
+    }
   };
 
   const updateTodo = async (id: string, payload: UpdateTodoPayload) => {
-    await todoService.update(id, payload);
-    await fetchTodos();
+    try {
+      await todoService.update(id, payload);
+      toast.success(t("todos.toast_update_success"));
+      await fetchTodos();
+    } catch (error) {
+      toast.error(t("todos.toast_update_error"));
+      throw error;
+    }
   };
 
   const toggleTodo = async (id: string) => {
     const previousTodos = todos;
+    const targetTodo = todos.find((todo) => todo.id === id);
+    const nextStatus = targetTodo?.status === "COMPLETED" ? "PENDING" : "COMPLETED";
 
     setTodos((currentTodos) =>
       currentTodos.map((todo) =>
@@ -92,15 +107,29 @@ export function useTodos() {
 
     try {
       await todoService.toggleStatus(id);
+      toast.success(
+        t(
+          nextStatus === "COMPLETED"
+            ? "todos.toast_complete_success"
+            : "todos.toast_reopen_success",
+        ),
+      );
     } catch {
       setTodos(previousTodos);
       setError(t("todos.error"));
+      toast.error(t("todos.toast_toggle_error"));
     }
   };
 
   const deleteTodo = async (id: string) => {
-    await todoService.remove(id);
-    await fetchTodos();
+    try {
+      await todoService.remove(id);
+      toast.success(t("todos.toast_delete_success"));
+      await fetchTodos();
+    } catch (error) {
+      toast.error(t("todos.toast_delete_error"));
+      throw error;
+    }
   };
 
   return {
