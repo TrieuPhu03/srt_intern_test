@@ -30,6 +30,7 @@
     "error": "Failed to load todos. Please try again.",
     "save_error": "Could not save this todo. Make sure the API server is running and try again.",
     "delete_error": "Could not delete this todo. Make sure the API server is running and try again.",
+    "duplicate_error": "A todo with the same title and description already exists.",
     "toast_create_success": "Todo created.",
     "toast_create_error": "Could not create this todo.",
     "toast_update_success": "Todo updated.",

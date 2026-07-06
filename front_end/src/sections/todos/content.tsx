@@ -9,6 +9,7 @@ import TodoFilterBar from "./components/TodoFilterBar";
 import TodoForm, { type TodoFormValues } from "./components/TodoForm";
 import TodoItem from "./components/TodoItem";
 import TodoPagination from "./components/TodoPagination";
+import { isTodoDuplicateError } from "./helpers/todo-error";
 import { useTodos } from "./hooks/useTodos";
 import type { Todo } from "./types/todo.types";
 
@@ -73,8 +74,10 @@ const TodosContent = () => {
       }
 
       closeForm();
-    } catch {
-      setMutationError(t("todos.save_error"));
+    } catch (error) {
+      setMutationError(
+        isTodoDuplicateError(error) ? t("todos.duplicate_error") : t("todos.save_error"),
+      );
     }
   }, [closeForm, createTodo, editingTodo, t, updateTodo]);
 
