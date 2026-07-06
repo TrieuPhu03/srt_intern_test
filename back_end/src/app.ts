@@ -9,7 +9,12 @@ import routes from "./routes";
 export const app = express();
 
 app.use(helmet());
-app.use(cors({ origin: env.CORS_ORIGIN }));
+app.use(
+  cors({
+    origin: ["http://localhost:5173", "https://todo.trieuphu.io.vn"],
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 app.get("/health", (_req, res) => {
