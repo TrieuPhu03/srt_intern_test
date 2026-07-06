@@ -1,6 +1,7 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -43,25 +44,25 @@ const TodosContent = () => {
     };
   }, [meta.total, todos]);
 
-  const openCreateForm = () => {
+  const openCreateForm = useCallback(() => {
     setEditingTodo(null);
     setMutationError(null);
     setIsFormOpen(true);
-  };
+  }, []);
 
-  const openEditForm = (todo: Todo) => {
+  const openEditForm = useCallback((todo: Todo) => {
     setEditingTodo(todo);
     setMutationError(null);
     setIsFormOpen(true);
-  };
+  }, []);
 
-  const closeForm = () => {
+  const closeForm = useCallback(() => {
     setIsFormOpen(false);
     setEditingTodo(null);
     setMutationError(null);
-  };
+  }, []);
 
-  const handleSubmit = async (values: TodoFormValues) => {
+  const handleSubmit = useCallback(async (values: TodoFormValues) => {
     setMutationError(null);
 
     try {
@@ -75,23 +76,44 @@ const TodosContent = () => {
     } catch {
       setMutationError(t("todos.save_error"));
     }
-  };
+  }, [closeForm, createTodo, editingTodo, t, updateTodo]);
 
-  const handleDelete = async (id: string) => {
-    const shouldDelete = window.confirm(
-      `${t("todos.delete_confirm_title")}\n${t("todos.delete_confirm_description")}`,
-    );
+  const confirmDelete = useCallback(async (id: string) => {
+    setMutationError(null);
 
-    if (shouldDelete) {
-      setMutationError(null);
-
-      try {
-        await deleteTodo(id);
-      } catch {
-        setMutationError(t("todos.delete_error"));
-      }
+    try {
+      await deleteTodo(id);
+    } catch {
+      setMutationError(t("todos.delete_error"));
     }
-  };
+  }, [deleteTodo, t]);
+
+  const handleDelete = useCallback((id: string) => {
+    const confirmToastId = toast.warning(t("todos.delete_confirm_title"), {
+      description: t("todos.delete_confirm_description"),
+      action: {
+        label: t("todos.delete_confirm_action"),
+        onClick: () => {
+          toast.dismiss(confirmToastId);
+          void confirmDelete(id);
+        },
+      },
+      cancel: {
+        label: t("todos.cancel"),
+        onClick: () => toast.dismiss(confirmToastId),
+      },
+      duration: 8000,
+    });
+  }, [confirmDelete, t]);
+
+  const handleFormOpenChange = useCallback((open: boolean) => {
+    if (open) {
+      setIsFormOpen(true);
+      return;
+    }
+
+    closeForm();
+  }, [closeForm]);
 
   return (
     <section className="mx-auto flex max-w-4xl flex-col gap-6">
@@ -156,7 +178,7 @@ const TodosContent = () => {
 
       <TodoPagination meta={meta} onPageChange={setPage} />
 
-      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+      <Dialog open={isFormOpen} onOpenChange={handleFormOpenChange}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>

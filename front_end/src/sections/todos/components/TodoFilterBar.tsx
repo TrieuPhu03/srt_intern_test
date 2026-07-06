@@ -1,6 +1,8 @@
+import { memo, useCallback, type ChangeEvent } from "react";
 import { Search } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import type { TodoStatus } from "../types/todo.types";
 
 interface TodoFilterBarProps {
@@ -17,6 +19,12 @@ const TodoFilterBar = ({
   onStatusChange,
 }: TodoFilterBarProps) => {
   const { t } = useTranslation();
+  const handleSearchChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+    onSearchChange(event.target.value);
+  }, [onSearchChange]);
+  const handleStatusChange = useCallback((event: ChangeEvent<HTMLSelectElement>) => {
+    onStatusChange(event.target.value as TodoStatus | "ALL");
+  }, [onStatusChange]);
 
   return (
     <div className="flex flex-col gap-3 rounded-lg border bg-card p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
@@ -28,24 +36,23 @@ const TodoFilterBar = ({
         />
         <Input
           value={search}
-          onChange={(event) => onSearchChange(event.target.value)}
+          onChange={handleSearchChange}
           placeholder={t("todos.search_placeholder")}
           className="pl-9"
         />
       </label>
 
-      <select
+      <Select
         value={status}
-        onChange={(event) => onStatusChange(event.target.value as TodoStatus | "ALL")}
-        className="h-9 rounded-md border border-input bg-background px-3 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-        aria-label="Filter todos by status"
+        onChange={handleStatusChange}
+        aria-label={t("todos.filter_status_label")}
       >
         <option value="ALL">{t("todos.filter_all")}</option>
         <option value="PENDING">{t("todos.filter_pending")}</option>
         <option value="COMPLETED">{t("todos.filter_completed")}</option>
-      </select>
+      </Select>
     </div>
   );
 };
 
-export default TodoFilterBar;
+export default memo(TodoFilterBar);

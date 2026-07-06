@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -8,12 +8,12 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import type { Todo } from "../types/todo.types";
 
-const todoSchema = z.object({
-  title: z.string().trim().min(1, { message: "Title is required" }).max(200),
+const createTodoSchema = (titleRequiredMessage: string) => z.object({
+  title: z.string().trim().min(1, { message: titleRequiredMessage }).max(200),
   description: z.string().trim().max(1000).optional(),
 });
 
-export type TodoFormValues = z.infer<typeof todoSchema>;
+export type TodoFormValues = z.infer<ReturnType<typeof createTodoSchema>>;
 
 interface TodoFormProps {
   initialValues?: Todo | null;
@@ -24,6 +24,10 @@ interface TodoFormProps {
 const TodoForm = ({ initialValues, onSubmit, onCancel }: TodoFormProps) => {
   const { t } = useTranslation();
   const isEditing = Boolean(initialValues);
+  const todoSchema = useMemo(
+    () => createTodoSchema(t("todos.validation_title_required")),
+    [t],
+  );
 
   const form = useForm<TodoFormValues>({
     resolver: zodResolver(todoSchema),
@@ -40,12 +44,14 @@ const TodoForm = ({ initialValues, onSubmit, onCancel }: TodoFormProps) => {
     });
   }, [form, initialValues]);
 
-  const handleSubmit = async (values: TodoFormValues) => {
+  const handleSubmit = useCallback(async (values: TodoFormValues) => {
+    const description = values.description ?? "";
+
     await onSubmit({
       title: values.title,
-      description: values.description || undefined,
+      description: isEditing ? description : description || undefined,
     });
-  };
+  }, [isEditing, onSubmit]);
 
   return (
     <Form {...form}>
