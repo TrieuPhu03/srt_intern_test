@@ -3,7 +3,8 @@
     "name": "SRT Todo",
     "todo_workspace": "Không gian công việc",
     "language": "Ngôn ngữ",
-    "theme": "Giao diện"
+    "theme": "Giao diện",
+    "toggle_theme": "Chuyển giao diện"
   },
   "common": {
     "loading": "Đang tải ứng dụng...",
@@ -20,6 +21,7 @@
     "filter_all": "Tất cả",
     "filter_pending": "Chưa hoàn thành",
     "filter_completed": "Hoàn thành",
+    "filter_status_label": "Lọc công việc theo trạng thái",
     "empty_state": "Chưa có công việc nào. Hãy tạo công việc đầu tiên.",
     "loading": "Đang tải công việc...",
     "error": "Không tải được danh sách công việc. Vui lòng thử lại.",
@@ -50,6 +52,11 @@
     "completed": "Hoàn thành",
     "stats_total": "Tổng",
     "stats_done": "Đã xong",
-    "stats_open": "Đang mở"
+    "stats_open": "Đang mở",
+    "mark_completed": "Đánh dấu công việc là hoàn thành",
+    "mark_pending": "Đánh dấu công việc là chưa xong",
+    "edit_label": "Chỉnh sửa công việc",
+    "delete_label": "Xóa công việc",
+    "validation_title_required": "Tiêu đề là bắt buộc"
   }
 }

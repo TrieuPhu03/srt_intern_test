@@ -1,4 +1,4 @@
-import { TodoStatus } from "@prisma/client";
+import { Prisma, TodoStatus } from "@prisma/client";
 import { AppError } from "../../../../src/common/errors/app-error";
 
 jest.mock("../../../../src/modules/todos/todo.repository", () => ({
@@ -24,6 +24,12 @@ const sampleTodo = {
   createdAt: new Date("2026-01-01T00:00:00.000Z"),
   updatedAt: new Date("2026-01-01T00:00:00.000Z"),
 };
+
+const prismaRecordNotFoundError = () =>
+  new Prisma.PrismaClientKnownRequestError("Record not found", {
+    code: "P2025",
+    clientVersion: "test",
+  });
 
 describe("todoService.list", () => {
   it("returns items with pagination metadata", async () => {
@@ -109,6 +115,17 @@ describe("todoService.update", () => {
     );
     expect(mockedRepo.update).not.toHaveBeenCalled();
   });
+
+  it("maps Prisma record-not-found errors to a 404 AppError", async () => {
+    mockedRepo.findById.mockResolvedValue(sampleTodo);
+    mockedRepo.update.mockRejectedValue(prismaRecordNotFoundError());
+
+    await expect(todoService.update(sampleTodo.id, { title: "x" })).rejects.toMatchObject({
+      statusCode: 404,
+      code: "TODO_NOT_FOUND",
+      message: "Todo not found",
+    });
+  });
 });
 
 describe("todoService.remove", () => {
@@ -127,6 +144,17 @@ describe("todoService.remove", () => {
 
     await expect(todoService.remove("missing-id")).rejects.toThrow(AppError);
     expect(mockedRepo.delete).not.toHaveBeenCalled();
+  });
+
+  it("maps Prisma record-not-found errors while deleting to a 404 AppError", async () => {
+    mockedRepo.findById.mockResolvedValue(sampleTodo);
+    mockedRepo.delete.mockRejectedValue(prismaRecordNotFoundError());
+
+    await expect(todoService.remove(sampleTodo.id)).rejects.toMatchObject({
+      statusCode: 404,
+      code: "TODO_NOT_FOUND",
+      message: "Todo not found",
+    });
   });
 });
 
@@ -165,5 +193,16 @@ describe("todoService.toggleStatus", () => {
 
     await expect(todoService.toggleStatus("missing-id")).rejects.toThrow(AppError);
     expect(mockedRepo.update).not.toHaveBeenCalled();
+  });
+
+  it("maps Prisma record-not-found errors while toggling to a 404 AppError", async () => {
+    mockedRepo.findById.mockResolvedValue(sampleTodo);
+    mockedRepo.update.mockRejectedValue(prismaRecordNotFoundError());
+
+    await expect(todoService.toggleStatus(sampleTodo.id)).rejects.toMatchObject({
+      statusCode: 404,
+      code: "TODO_NOT_FOUND",
+      message: "Todo not found",
+    });
   });
 });

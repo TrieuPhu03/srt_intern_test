@@ -1,3 +1,4 @@
+import { memo, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import type { PaginationMeta } from "@/types/api";
@@ -9,8 +10,17 @@ interface TodoPaginationProps {
 
 const TodoPagination = ({ meta, onPageChange }: TodoPaginationProps) => {
   const { t } = useTranslation();
+  const { page, totalPages } = meta;
 
-  if (meta.totalPages <= 1) {
+  const handlePreviousPage = useCallback(() => {
+    onPageChange(page - 1);
+  }, [onPageChange, page]);
+
+  const handleNextPage = useCallback(() => {
+    onPageChange(page + 1);
+  }, [onPageChange, page]);
+
+  if (totalPages <= 1) {
     return null;
   }
 
@@ -20,20 +30,20 @@ const TodoPagination = ({ meta, onPageChange }: TodoPaginationProps) => {
         type="button"
         variant="outline"
         size="sm"
-        disabled={meta.page <= 1}
-        onClick={() => onPageChange(meta.page - 1)}
+        disabled={page <= 1}
+        onClick={handlePreviousPage}
       >
         {t("common.previous")}
       </Button>
       <span className="text-sm text-muted-foreground">
-        {t("common.page")} {meta.page} / {meta.totalPages}
+        {t("common.page")} {page} / {totalPages}
       </span>
       <Button
         type="button"
         variant="outline"
         size="sm"
-        disabled={meta.page >= meta.totalPages}
-        onClick={() => onPageChange(meta.page + 1)}
+        disabled={page >= totalPages}
+        onClick={handleNextPage}
       >
         {t("common.next")}
       </Button>
@@ -41,4 +51,4 @@ const TodoPagination = ({ meta, onPageChange }: TodoPaginationProps) => {
   );
 };
 
-export default TodoPagination;
+export default memo(TodoPagination);

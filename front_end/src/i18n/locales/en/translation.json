@@ -3,7 +3,8 @@
     "name": "SRT Todo",
     "todo_workspace": "Todo workspace",
     "language": "Language",
-    "theme": "Theme"
+    "theme": "Theme",
+    "toggle_theme": "Toggle theme"
   },
   "common": {
     "loading": "Loading application...",
@@ -20,6 +21,7 @@
     "filter_all": "All",
     "filter_pending": "Pending",
     "filter_completed": "Completed",
+    "filter_status_label": "Filter todos by status",
     "empty_state": "No todos found. Create your first one.",
     "loading": "Loading todos...",
     "error": "Failed to load todos. Please try again.",
@@ -50,6 +52,11 @@
     "completed": "Completed",
     "stats_total": "Total",
     "stats_done": "Completed",
-    "stats_open": "Open"
+    "stats_open": "Open",
+    "mark_completed": "Mark todo as completed",
+    "mark_pending": "Mark todo as pending",
+    "edit_label": "Edit todo",
+    "delete_label": "Delete todo",
+    "validation_title_required": "Title is required"
   }
 }
