@@ -7,7 +7,7 @@ export const ROUTES = {
   TODOS: "/todos",
 } as const;
 
-const TodosPage = React.lazy(() => import("./todos"));
+const TodosPage = React.lazy(() => import("../pages/todos"));
 
 export const router = createBrowserRouter([
   {

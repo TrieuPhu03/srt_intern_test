@@ -4,7 +4,10 @@
     "todo_workspace": "Không gian công việc",
     "language": "Ngôn ngữ",
     "theme": "Giao diện",
-    "toggle_theme": "Chuyển giao diện"
+    "toggle_theme": "Chuyển giao diện",
+    "footer_note": "Xây dựng cho bài test thực tập sinh SRT",
+    "footer_status": "Sẵn sàng để review",
+    "footer_copyright": "{{year}} {{appName}}"
   },
   "common": {
     "loading": "Đang tải ứng dụng...",

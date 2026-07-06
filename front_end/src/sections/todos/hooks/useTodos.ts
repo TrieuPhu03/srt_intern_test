@@ -11,7 +11,6 @@ import type {
   UpdateTodoPayload,
 } from "../types/todo.types";
 
-const DEBOUNCE_MS = 400;
 const PAGE_SIZE = 10;
 
 export function useTodos() {
@@ -24,31 +23,21 @@ export function useTodos() {
     totalPages: 0,
   });
   const [search, setSearch] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [status, setStatus] = useState<TodoStatus | "ALL">("ALL");
   const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const timer = window.setTimeout(() => {
-      setDebouncedSearch(search);
-      setPage(1);
-    }, DEBOUNCE_MS);
-
-    return () => window.clearTimeout(timer);
-  }, [search]);
-
   const query: TodoListQuery = useMemo(
     () => ({
-      search: debouncedSearch || undefined,
+      search: search || undefined,
       status: status === "ALL" ? undefined : status,
       page,
       limit: PAGE_SIZE,
       sortBy: "createdAt",
       sortOrder: "desc",
     }),
-    [debouncedSearch, page, status],
+    [page, search, status],
   );
 
   const fetchTodos = useCallback(async () => {
