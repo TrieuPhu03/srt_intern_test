@@ -2,9 +2,9 @@ import { useCallback, useMemo, useState } from "react";
 import { Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import FormDialog from "@/components/common/FormDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import TodoFilterBar from "./components/TodoFilterBar";
 import TodoForm, { type TodoFormValues } from "./components/TodoForm";
 import TodoItem from "./components/TodoItem";
@@ -88,6 +88,11 @@ const TodosContent = () => {
     }
   }, [deleteTodo, t]);
 
+  const handleSearchChange = useCallback((value: string) => {
+    setSearch(value);
+    setPage(1);
+  }, [setPage, setSearch]);
+
   const handleDelete = useCallback((id: string) => {
     const confirmToastId = toast.warning(t("todos.delete_confirm_title"), {
       description: t("todos.delete_confirm_description"),
@@ -141,7 +146,7 @@ const TodosContent = () => {
 
       <TodoFilterBar
         search={search}
-        onSearchChange={setSearch}
+        onSearchChange={handleSearchChange}
         status={status}
         onStatusChange={setStatus}
       />
@@ -178,21 +183,14 @@ const TodosContent = () => {
 
       <TodoPagination meta={meta} onPageChange={setPage} />
 
-      <Dialog open={isFormOpen} onOpenChange={handleFormOpenChange}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {editingTodo ? t("todos.form_title_edit") : t("todos.form_title_create")}
-            </DialogTitle>
-          </DialogHeader>
-          {mutationError ? (
-            <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-              {mutationError}
-            </div>
-          ) : null}
-          <TodoForm initialValues={editingTodo} onSubmit={handleSubmit} onCancel={closeForm} />
-        </DialogContent>
-      </Dialog>
+      <FormDialog
+        open={isFormOpen}
+        onOpenChange={handleFormOpenChange}
+        title={editingTodo ? t("todos.form_title_edit") : t("todos.form_title_create")}
+        error={mutationError}
+      >
+        <TodoForm initialValues={editingTodo} onSubmit={handleSubmit} onCancel={closeForm} />
+      </FormDialog>
     </section>
   );
 };
