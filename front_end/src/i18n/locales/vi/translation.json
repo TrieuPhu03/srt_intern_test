@@ -30,6 +30,7 @@
     "error": "Không tải được danh sách công việc. Vui lòng thử lại.",
     "save_error": "Không lưu được công việc này. Hãy kiểm tra API server đang chạy rồi thử lại.",
     "delete_error": "Không xóa được công việc này. Hãy kiểm tra API server đang chạy rồi thử lại.",
+    "duplicate_error": "Đã có công việc trùng tiêu đề và mô tả.",
     "toast_create_success": "Đã tạo công việc.",
     "toast_create_error": "Không tạo được công việc này.",
     "toast_update_success": "Đã cập nhật công việc.",
