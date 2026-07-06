@@ -1,7 +1,12 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "../../config/prisma";
 import { Pagination } from "../../common/utils/pagination.util";
-import { CreateTodoInput, TodoFilters, UpdateTodoInput } from "./todo.types";
+import {
+  CreateTodoInput,
+  TodoDuplicateLookup,
+  TodoFilters,
+  UpdateTodoInput,
+} from "./todo.types";
 
 export const todoRepository = {
   findMany: (filters: TodoFilters, pagination: Pagination) => {
@@ -27,6 +32,15 @@ export const todoRepository = {
   },
 
   findById: (id: string) => prisma.todo.findUnique({ where: { id } }),
+
+  findDuplicate: ({ title, description, excludeId }: TodoDuplicateLookup) =>
+    prisma.todo.findFirst({
+      where: {
+        title,
+        description,
+        ...(excludeId && { id: { not: excludeId } }),
+      },
+    }),
 
   create: (data: CreateTodoInput) => prisma.todo.create({ data }),
 

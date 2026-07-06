@@ -5,6 +5,7 @@ jest.mock("../../../../src/modules/todos/todo.repository", () => ({
   todoRepository: {
     findMany: jest.fn(),
     findById: jest.fn(),
+    findDuplicate: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
@@ -23,6 +24,29 @@ const sampleTodo = {
   status: TodoStatus.PENDING,
   createdAt: new Date("2026-01-01T00:00:00.000Z"),
   updatedAt: new Date("2026-01-01T00:00:00.000Z"),
+};
+
+const duplicateTodo = {
+  ...sampleTodo,
+  id: "650e8400-e29b-41d4-a716-446655440000",
+};
+
+const duplicateError = {
+  statusCode: 409,
+  code: "TODO_DUPLICATE",
+  message: "A todo with the same title and description already exists",
+};
+
+const expectDuplicateLookup = (
+  title: string,
+  description: string | null,
+  excludeId?: string
+) => {
+  expect(mockedRepo.findDuplicate).toHaveBeenCalledWith({
+    title,
+    description,
+    excludeId,
+  });
 };
 
 const prismaRecordNotFoundError = () =>
@@ -82,13 +106,51 @@ describe("todoService.getById", () => {
 });
 
 describe("todoService.create", () => {
-  it("delegates to the repository with the given payload", async () => {
+  it("normalizes the payload before checking duplicates and creating", async () => {
+    mockedRepo.findDuplicate.mockResolvedValue(null);
     mockedRepo.create.mockResolvedValue(sampleTodo);
 
-    const result = await todoService.create({ title: "Write unit tests" });
+    const result = await todoService.create({
+      title: " Write unit tests ",
+      description: " Cover the service layer ",
+    });
 
-    expect(mockedRepo.create).toHaveBeenCalledWith({ title: "Write unit tests" });
+    expectDuplicateLookup("Write unit tests", "Cover the service layer");
+    expect(mockedRepo.create).toHaveBeenCalledWith({
+      title: "Write unit tests",
+      description: "Cover the service layer",
+    });
     expect(result).toEqual(sampleTodo);
+  });
+
+  it("normalizes blank descriptions to null before checking duplicates", async () => {
+    mockedRepo.findDuplicate.mockResolvedValue(null);
+    mockedRepo.create.mockResolvedValue({ ...sampleTodo, description: null });
+
+    await todoService.create({
+      title: "Write unit tests",
+      description: "   ",
+    });
+
+    expectDuplicateLookup("Write unit tests", null);
+    expect(mockedRepo.create).toHaveBeenCalledWith({
+      title: "Write unit tests",
+      description: null,
+    });
+  });
+
+  it("rejects duplicate title and description pairs before creating", async () => {
+    mockedRepo.findDuplicate.mockResolvedValue(sampleTodo);
+
+    await expect(
+      todoService.create({
+        title: " Write unit tests ",
+        description: " Cover the service layer ",
+      })
+    ).rejects.toMatchObject(duplicateError);
+
+    expectDuplicateLookup("Write unit tests", "Cover the service layer");
+    expect(mockedRepo.create).not.toHaveBeenCalled();
   });
 });
 
@@ -96,15 +158,33 @@ describe("todoService.update", () => {
   it("checks existence before updating", async () => {
     const updatedTodo = { ...sampleTodo, title: "Updated title" };
     mockedRepo.findById.mockResolvedValue(sampleTodo);
+    mockedRepo.findDuplicate.mockResolvedValue(null);
     mockedRepo.update.mockResolvedValue(updatedTodo);
 
     const result = await todoService.update(sampleTodo.id, { title: "Updated title" });
 
     expect(mockedRepo.findById).toHaveBeenCalledWith(sampleTodo.id);
+    expectDuplicateLookup("Updated title", "Cover the service layer", sampleTodo.id);
     expect(mockedRepo.update).toHaveBeenCalledWith(sampleTodo.id, {
       title: "Updated title",
     });
     expect(result).toEqual(updatedTodo);
+  });
+
+  it("does not check duplicates for status-only updates", async () => {
+    const completedTodo = { ...sampleTodo, status: TodoStatus.COMPLETED };
+    mockedRepo.findById.mockResolvedValue(sampleTodo);
+    mockedRepo.update.mockResolvedValue(completedTodo);
+
+    const result = await todoService.update(sampleTodo.id, {
+      status: TodoStatus.COMPLETED,
+    });
+
+    expect(mockedRepo.findDuplicate).not.toHaveBeenCalled();
+    expect(mockedRepo.update).toHaveBeenCalledWith(sampleTodo.id, {
+      status: TodoStatus.COMPLETED,
+    });
+    expect(result).toEqual(completedTodo);
   });
 
   it("does not update when the todo does not exist", async () => {
@@ -118,6 +198,7 @@ describe("todoService.update", () => {
 
   it("maps Prisma record-not-found errors to a 404 AppError", async () => {
     mockedRepo.findById.mockResolvedValue(sampleTodo);
+    mockedRepo.findDuplicate.mockResolvedValue(null);
     mockedRepo.update.mockRejectedValue(prismaRecordNotFoundError());
 
     await expect(todoService.update(sampleTodo.id, { title: "x" })).rejects.toMatchObject({
@@ -125,6 +206,39 @@ describe("todoService.update", () => {
       code: "TODO_NOT_FOUND",
       message: "Todo not found",
     });
+  });
+
+  it("checks duplicates with the existing title when only description changes", async () => {
+    mockedRepo.findById.mockResolvedValue(sampleTodo);
+    mockedRepo.findDuplicate.mockResolvedValue(null);
+    mockedRepo.update.mockResolvedValue({
+      ...sampleTodo,
+      description: "Updated description",
+    });
+
+    await todoService.update(sampleTodo.id, {
+      description: " Updated description ",
+    });
+
+    expectDuplicateLookup("Write unit tests", "Updated description", sampleTodo.id);
+    expect(mockedRepo.update).toHaveBeenCalledWith(sampleTodo.id, {
+      description: "Updated description",
+    });
+  });
+
+  it("rejects updates that would duplicate another todo before updating", async () => {
+    mockedRepo.findById.mockResolvedValue(sampleTodo);
+    mockedRepo.findDuplicate.mockResolvedValue(duplicateTodo);
+
+    await expect(
+      todoService.update(sampleTodo.id, {
+        title: "Write unit tests",
+        description: "Cover the service layer",
+      })
+    ).rejects.toMatchObject(duplicateError);
+
+    expectDuplicateLookup("Write unit tests", "Cover the service layer", sampleTodo.id);
+    expect(mockedRepo.update).not.toHaveBeenCalled();
   });
 });
 

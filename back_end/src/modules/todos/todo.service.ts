@@ -5,6 +5,19 @@ import { todoRepository } from "./todo.repository";
 import { CreateTodoInput, ListTodoQuery, UpdateTodoInput } from "./todo.types";
 
 const todoNotFoundError = () => new AppError("Todo not found", 404, "TODO_NOT_FOUND");
+const todoDuplicateError = () =>
+  new AppError(
+    "A todo with the same title and description already exists",
+    409,
+    "TODO_DUPLICATE"
+  );
+
+const normalizeTitle = (title: string) => title.trim();
+
+const normalizeDescription = (description?: string | null) => {
+  const normalizedDescription = description?.trim();
+  return normalizedDescription ? normalizedDescription : null;
+};
 
 const isPrismaRecordNotFoundError = (error: unknown) => {
   return (
@@ -18,6 +31,22 @@ const mapPrismaRecordNotFound = (error: unknown): never => {
   }
 
   throw error;
+};
+
+const assertTodoIsUnique = async (
+  title: string,
+  description: string | null,
+  excludeId?: string
+) => {
+  const duplicateTodo = await todoRepository.findDuplicate({
+    title,
+    description,
+    excludeId,
+  });
+
+  if (duplicateTodo) {
+    throw todoDuplicateError();
+  }
 };
 
 export const todoService = {
@@ -50,12 +79,36 @@ export const todoService = {
     return todo;
   },
 
-  create: async (data: CreateTodoInput) => todoRepository.create(data),
+  create: async (data: CreateTodoInput) => {
+    const title = normalizeTitle(data.title);
+    const description = normalizeDescription(data.description);
+
+    await assertTodoIsUnique(title, description);
+
+    return todoRepository.create({ ...data, title, description });
+  },
 
   update: async (id: string, data: UpdateTodoInput) => {
-    await todoService.getById(id);
+    const existingTodo = await todoService.getById(id);
+    const shouldCheckDuplicate = "title" in data || "description" in data;
+    const title = "title" in data ? normalizeTitle(data.title ?? "") : existingTodo.title;
+    const description =
+      "description" in data
+        ? normalizeDescription(data.description)
+        : normalizeDescription(existingTodo.description);
+
+    if (shouldCheckDuplicate) {
+      await assertTodoIsUnique(title, description, id);
+    }
+
+    const updateData: UpdateTodoInput = {
+      ...data,
+      ...("title" in data && { title }),
+      ...("description" in data && { description }),
+    };
+
     try {
-      return await todoRepository.update(id, data);
+      return await todoRepository.update(id, updateData);
     } catch (error) {
       return mapPrismaRecordNotFound(error);
     }

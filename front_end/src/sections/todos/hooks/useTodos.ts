@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import type { PaginationMeta } from "@/types/api";
+import { isTodoDuplicateError } from "../helpers/todo-error";
 import { todoService } from "../services/todo.service";
 import type {
   CreateTodoPayload,
@@ -65,7 +66,11 @@ export function useTodos() {
       toast.success(t("todos.toast_create_success"));
       await fetchTodos();
     } catch (error) {
-      toast.error(t("todos.toast_create_error"));
+      toast.error(
+        isTodoDuplicateError(error)
+          ? t("todos.duplicate_error")
+          : t("todos.toast_create_error"),
+      );
       throw error;
     }
   }, [fetchTodos, t]);
@@ -76,7 +81,11 @@ export function useTodos() {
       toast.success(t("todos.toast_update_success"));
       await fetchTodos();
     } catch (error) {
-      toast.error(t("todos.toast_update_error"));
+      toast.error(
+        isTodoDuplicateError(error)
+          ? t("todos.duplicate_error")
+          : t("todos.toast_update_error"),
+      );
       throw error;
     }
   }, [fetchTodos, t]);
