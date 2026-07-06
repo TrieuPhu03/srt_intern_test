@@ -61,3 +61,30 @@
       "calt" 1;
   }
 }
+
+@layer components {
+  .dark .custom-pagination .ant-pagination-prev .ant-pagination-item-link,
+  .dark .custom-pagination .ant-pagination-next .ant-pagination-item-link {
+    color: hsl(var(--muted-foreground));
+    background: transparent;
+    border-color: transparent;
+  }
+
+  .dark
+    .custom-pagination
+    .ant-pagination-prev:not(.ant-pagination-disabled):hover
+    .ant-pagination-item-link,
+  .dark
+    .custom-pagination
+    .ant-pagination-next:not(.ant-pagination-disabled):hover
+    .ant-pagination-item-link {
+    color: hsl(var(--foreground));
+    background: hsl(var(--accent));
+  }
+
+  .dark .custom-pagination .ant-pagination-disabled .ant-pagination-item-link,
+  .dark .custom-pagination .ant-pagination-disabled:hover .ant-pagination-item-link {
+    color: hsl(var(--muted-foreground) / 0.45);
+    background: transparent;
+  }
+}

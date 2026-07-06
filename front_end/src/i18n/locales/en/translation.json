@@ -4,7 +4,10 @@
     "todo_workspace": "Todo workspace",
     "language": "Language",
     "theme": "Theme",
-    "toggle_theme": "Toggle theme"
+    "toggle_theme": "Toggle theme",
+    "footer_note": "Built for the SRT intern assignment",
+    "footer_status": "Ready for review",
+    "footer_copyright": "{{year}} {{appName}}"
   },
   "common": {
     "loading": "Loading application...",
