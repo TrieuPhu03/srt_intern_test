@@ -7,11 +7,15 @@ import { notFoundHandler } from "./middlewares/not-found.middleware";
 import routes from "./routes";
 
 export const app = express();
+const allowedOrigins = env.CORS_ORIGIN.split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+const corsOrigin = allowedOrigins.includes("*") ? true : allowedOrigins;
 
 app.use(helmet());
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://todo.trieuphu.io.vn"],
+    origin: corsOrigin,
     credentials: true,
   })
 );

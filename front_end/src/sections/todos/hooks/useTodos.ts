@@ -70,7 +70,7 @@ export function useTodos() {
     void fetchTodos();
   }, [fetchTodos]);
 
-  const createTodo = async (payload: CreateTodoPayload) => {
+  const createTodo = useCallback(async (payload: CreateTodoPayload) => {
     try {
       await todoService.create(payload);
       toast.success(t("todos.toast_create_success"));
@@ -79,9 +79,9 @@ export function useTodos() {
       toast.error(t("todos.toast_create_error"));
       throw error;
     }
-  };
+  }, [fetchTodos, t]);
 
-  const updateTodo = async (id: string, payload: UpdateTodoPayload) => {
+  const updateTodo = useCallback(async (id: string, payload: UpdateTodoPayload) => {
     try {
       await todoService.update(id, payload);
       toast.success(t("todos.toast_update_success"));
@@ -90,18 +90,20 @@ export function useTodos() {
       toast.error(t("todos.toast_update_error"));
       throw error;
     }
-  };
+  }, [fetchTodos, t]);
 
-  const toggleTodo = async (id: string) => {
-    const previousTodos = todos;
+  const toggleTodo = useCallback(async (id: string) => {
     const targetTodo = todos.find((todo) => todo.id === id);
+    if (!targetTodo) {
+      return;
+    }
+
+    const previousStatus = targetTodo.status;
     const nextStatus = targetTodo?.status === "COMPLETED" ? "PENDING" : "COMPLETED";
 
     setTodos((currentTodos) =>
       currentTodos.map((todo) =>
-        todo.id === id
-          ? { ...todo, status: todo.status === "PENDING" ? "COMPLETED" : "PENDING" }
-          : todo,
+        todo.id === id ? { ...todo, status: nextStatus } : todo,
       ),
     );
 
@@ -115,13 +117,19 @@ export function useTodos() {
         ),
       );
     } catch {
-      setTodos(previousTodos);
+      setTodos((currentTodos) =>
+        currentTodos.map((todo) =>
+          todo.id === id && todo.status === nextStatus
+            ? { ...todo, status: previousStatus }
+            : todo,
+        ),
+      );
       setError(t("todos.error"));
       toast.error(t("todos.toast_toggle_error"));
     }
-  };
+  }, [todos, t]);
 
-  const deleteTodo = async (id: string) => {
+  const deleteTodo = useCallback(async (id: string) => {
     try {
       await todoService.remove(id);
       toast.success(t("todos.toast_delete_success"));
@@ -130,7 +138,7 @@ export function useTodos() {
       toast.error(t("todos.toast_delete_error"));
       throw error;
     }
-  };
+  }, [fetchTodos, t]);
 
   return {
     todos,

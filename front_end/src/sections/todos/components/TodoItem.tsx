@@ -1,3 +1,4 @@
+import { memo, useCallback } from "react";
 import { Check, Pencil, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
@@ -14,23 +15,35 @@ interface TodoItemProps {
 
 const TodoItem = ({ todo, onToggle, onEdit, onDelete }: TodoItemProps) => {
   const { t } = useTranslation();
-  const isCompleted = todo.status === "COMPLETED";
+  const { id, title, description, status } = todo;
+  const isCompleted = status === "COMPLETED";
+
+  const handleToggle = useCallback(() => {
+    onToggle(id);
+  }, [id, onToggle]);
+
+  const handleEdit = useCallback(() => {
+    onEdit(todo);
+  }, [onEdit, todo]);
+
+  const handleDelete = useCallback(() => {
+    onDelete(id);
+  }, [id, onDelete]);
 
   return (
     <article className="flex items-start justify-between gap-4 rounded-lg border bg-card p-4 shadow-sm transition-colors hover:bg-accent/40">
       <div className="flex min-w-0 flex-1 items-start gap-3">
-        <button
+        <Button
           type="button"
-          onClick={() => onToggle(todo.id)}
-          className={cn(
-            "mt-0.5 flex size-5 shrink-0 items-center justify-center rounded border text-primary-foreground transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-            isCompleted ? "border-primary bg-primary" : "border-input bg-background",
-          )}
-          aria-label={isCompleted ? t("todos.pending") : t("todos.completed")}
+          variant={isCompleted ? "default" : "outline"}
+          size="icon"
+          onClick={handleToggle}
+          className="mt-0.5 size-5 shrink-0 rounded p-0"
+          aria-label={isCompleted ? t("todos.mark_pending") : t("todos.mark_completed")}
           aria-pressed={isCompleted}
         >
           {isCompleted ? <Check data-icon="inline-start" /> : null}
-        </button>
+        </Button>
 
         <div className="flex min-w-0 flex-1 flex-col gap-2">
           <div className="flex flex-wrap items-center gap-2">
@@ -40,28 +53,28 @@ const TodoItem = ({ todo, onToggle, onEdit, onDelete }: TodoItemProps) => {
                 isCompleted && "text-muted-foreground line-through",
               )}
             >
-              {todo.title}
+              {title}
             </h2>
             <Badge variant={isCompleted ? "secondary" : "outline"}>
               {isCompleted ? t("todos.completed") : t("todos.pending")}
             </Badge>
           </div>
-          {todo.description ? (
-            <p className="line-clamp-2 text-sm text-muted-foreground">{todo.description}</p>
+          {description ? (
+            <p className="line-clamp-2 text-sm text-muted-foreground">{description}</p>
           ) : null}
         </div>
       </div>
 
       <div className="flex shrink-0 items-center gap-1">
-        <Button type="button" variant="ghost" size="icon" onClick={() => onEdit(todo)} aria-label="Edit todo">
+        <Button type="button" variant="ghost" size="icon" onClick={handleEdit} aria-label={t("todos.edit_label")}>
           <Pencil data-icon="inline-start" />
         </Button>
         <Button
           type="button"
           variant="ghost"
           size="icon"
-          onClick={() => onDelete(todo.id)}
-          aria-label="Delete todo"
+          onClick={handleDelete}
+          aria-label={t("todos.delete_label")}
         >
           <Trash2 data-icon="inline-start" className="text-destructive" />
         </Button>
@@ -70,4 +83,4 @@ const TodoItem = ({ todo, onToggle, onEdit, onDelete }: TodoItemProps) => {
   );
 };
 
-export default TodoItem;
+export default memo(TodoItem);
