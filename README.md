@@ -1,8 +1,38 @@
 # SRT Todo
 
+[![CI](https://github.com/TrieuPhu03/srt_intern_test/actions/workflows/ci.yml/badge.svg)](https://github.com/TrieuPhu03/srt_intern_test/actions/workflows/ci.yml)
+
 Full-stack Todo List Management application for the SRT intern assignment.
 
 The project includes a React/Vite frontend, an Express/TypeScript backend, PostgreSQL persistence through Prisma, validation, centralized error handling, unit tests, and GitHub Actions CI.
+
+## Live Demo
+
+- Website: [https://todo.trieuphu.io.vn/todos](https://todo.trieuphu.io.vn/todos)
+- Demo video: [Google Drive folder](https://drive.google.com/drive/folders/1_OGMD1wkTr1ymfTH4BC8lrip9S8NWOMO?usp=sharing)
+
+### Application Preview
+
+![SRT Todo live demo](docs/images/todo-live-demo.png)
+
+### Add/Edit Todo Flow
+
+![Create todo modal](docs/images/todo-create-modal.png)
+
+![Edit todo modal](docs/images/todo-edit-modal.png)
+
+### Docker Backend Preview
+
+![Docker backend and PostgreSQL containers](docs/images/docker-backend-containers.png)
+
+## Highlights
+
+- Full-stack TypeScript todo application with a React/Vite frontend and Express backend.
+- PostgreSQL persistence through Prisma schema, migrations, and generated client.
+- Complete todo workflow: create, edit, delete, toggle status, search, filter, sort, and paginate.
+- Zod validation, centralized API error handling, and user-facing toast feedback.
+- Light/dark theme and English/Vietnamese UI text support.
+- Backend tests, frontend typecheck, production builds, and Docker image build are covered by GitHub Actions CI.
 
 ## Features
 
@@ -45,6 +75,26 @@ Tooling:
 
 - GitHub Actions CI
 - Docker and Docker Compose for optional local backend/database container usage
+
+## Architecture Overview
+
+```text
+React/Vite UI
+     |
+     v
+Express/TypeScript API
+     |
+     v
+Prisma ORM
+     |
+     v
+PostgreSQL
+```
+
+Supporting workflow:
+
+- GitHub Actions validates backend tests/build, frontend typecheck/build, and Docker image build.
+- Docker Compose can run PostgreSQL and the backend API for local container-based verification.
 
 ## Project Structure
 
@@ -240,6 +290,13 @@ npm run build
 ```
 
 The backend test suite covers the todo service, controller, validation schemas, middleware, and pagination utility.
+
+## Quality Checks
+
+- Backend: Jest and Supertest test coverage for service, controller, validation, middleware, and pagination behavior.
+- Frontend: TypeScript project typecheck and production Vite build.
+- CI: backend install/test/build, frontend install/typecheck/build, and backend Docker image build.
+- Docker: optional local API and PostgreSQL container workflow for environment parity checks.
 
 ## Optional Docker Backend
 
